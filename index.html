@@ -8,11 +8,25 @@
 </head>
 <body>
 <!-- partial:index.partial.html -->
-<button onclick="myFunction()">Click me</button>
+<!--
+Summary: This website shows an aggregated data set of school and district wide data pulled and compiled from five separate NYC Open Data datasets. A separate program was used to compile the data into firebase. This website will be used to help inform program officers about the NYC DOE schools by providing aggregated and disaggregated school data. Future version will include: 1) citywide data, 2) interactive map showing school locations, 3) choice of school year, 4) district display selection. 
+Author: Steven Azeka
+Attributions: Jin Kuwata
+Firebase: Pulled from NYC Open Data
+-->
+
+<div id="app">
+  <v-app>
+    <v-card>
+      <schools></schools>
+    </v-card>
+  </v-app>
+</div>
 <!-- partial -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.min.js'></script><script  src="./script.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.5.9/vuetify.min.js'></script><script  src="./script.js"></script>
 
 </body>
 </html>
