@@ -1,12 +1,20 @@
-// Data Values:
-/*
-
-*/
-
 // Schools Component
 Vue.component("schools", {
   data() {
     return {
+      //Test
+      mathDataPie: [
+        {
+          values: [],
+          labels: ["Level 1", "Level 2", "Level 3", "Level 4"],
+          type: "pie"
+        }
+      ],
+      layout: {
+        height: 400,
+        width: 500
+      },
+
       output: {},
 
       // Popup Values
@@ -14,10 +22,13 @@ Vue.component("schools", {
       mathLevel2: 0,
       mathLevel3: 0,
       mathLevel4: 0,
+      mathLevel34: 0,
       elaLevel1: 0,
       elaLevel2: 0,
       elaLevel3: 0,
       elaLevel4: 0,
+      elaLevel34: 0,
+      schoolName: "",
 
       dialog: false,
 
@@ -46,15 +57,20 @@ Vue.component("schools", {
         { text: "Male (%)", value: "male" },
         { text: "Black (%)", value: "black" },
         { text: "Hispanic (%)", value: "hispanic" },
-        { text: "Poverty (%)", value: "poverty" }
+        { text: "Poverty (%)", value: "poverty" },
+        { text: "ELA (%)", value: "elaLevel34" },
+        { text: "Math (%)", value: "mathLevel34" }
       ],
 
       // Array for output
       schools: []
     };
   },
-
+  
+  // Print the piechart using Plotly
   mounted() {
+    Plotly.newPlot(this.$refs.plot1, this.mathDataPie, this.layout);
+
     /* 
 Pulling the processed CSV from Github and parsing the CSV.
 Papa Parse: https://www.papaparse.com/
@@ -79,6 +95,20 @@ Papa Parse: https://www.papaparse.com/
     });
   },
   methods: {
+    
+    // Gives the ELA scores a color
+    getColorELA (elaLevel34) {
+      if (elaLevel34 < 45.4) return 'red'
+      else if (elaLevel34 < 70) return 'orange'
+      else return 'green'
+    },
+    // Gives the Math scores a color
+    getColorMath (mathLevel34) {
+      if (mathLevel34 < 46.7) return 'red'
+      else if (mathLevel34 < 70) return 'orange'
+      else return 'green'
+    },
+    
     load() {
       //console.log(this.output.data);
 
@@ -154,12 +184,12 @@ Papa Parse: https://www.papaparse.com/
           name: this.output.data[i].school_name,
           dbn: this.output.data[i].DBN,
           schoolType: this.output.data[i].school_type,
-          totalEnrollment: this.output.data[i].total_enrollment,
-          female: this.output.data[i].female_per,
-          male: this.output.data[i].male_per,
-          black: this.output.data[i].black_per,
-          hispanic: this.output.data[i].hispanic_per,
-          poverty: this.output.data[i].poverty_per,
+          totalEnrollment: parseInt(this.output.data[i].total_enrollment),
+          female: parseInt(this.output.data[i].female_per),
+          male: parseInt(this.output.data[i].male_per),
+          black: parseInt(this.output.data[i].black_per),
+          hispanic: parseInt(this.output.data[i].hispanic_per),
+          poverty: parseInt(this.output.data[i].poverty_per),
           mathLevel1: this.output.data[i]["Pct Level 1"],
           mathLevel2: this.output.data[i]["Pct Level 2"],
           mathLevel3: this.output.data[i]["Pct Level 3"],
@@ -167,15 +197,31 @@ Papa Parse: https://www.papaparse.com/
           elaLevel1: 0,
           elaLevel2: 0,
           elaLevel3: 0,
-          elaLevel4: 0,          
+          elaLevel4: 0,
+          mathLevel34:
+            parseInt(this.output.data[i]["Pct Level 3"]) +
+            parseInt(this.output.data[i]["Pct Level 4"])
         });
-      } 
-      
-      else if (this.output.data[i].subject == "ela" && this.output.data[i].dbn == this.output.data[i-1].dbn) {
-        this.schools[this.schools.length-1].elaLevel1 = this.output.data[i]["Pct Level 1"]
-      this.schools[this.schools.length-1].elaLevel2 = this.output.data[i]["Pct Level 2"]
-        this.schools[this.schools.length-1].elaLevel3 = this.output.data[i]["Pct Level 3"]
-        this.schools[this.schools.length-1].elaLevel4 = this.output.data[i]["Pct Level 4"]
+      } else if (
+        this.output.data[i].subject == "ela" &&
+        this.output.data[i].dbn == this.output.data[i - 1].dbn
+      ) {
+        this.schools[this.schools.length - 1].elaLevel1 = this.output.data[i][
+          "Pct Level 1"
+        ];
+        this.schools[this.schools.length - 1].elaLevel2 = this.output.data[i][
+          "Pct Level 2"
+        ];
+        this.schools[this.schools.length - 1].elaLevel3 = this.output.data[i][
+          "Pct Level 3"
+        ];
+        this.schools[this.schools.length - 1].elaLevel4 = this.output.data[i][
+          "Pct Level 4"
+        ];
+        this.schools[this.schools.length - 1].elaLevel34 = parseInt(
+          this.output.data[i]["Pct Level 3"] +
+            this.output.data[i]["Pct Level 4"]
+        );
       }
     },
     clear() {
@@ -192,14 +238,27 @@ Papa Parse: https://www.papaparse.com/
       this.elaLevel2 = Math.round(value.elaLevel2);
       this.elaLevel3 = Math.round(value.elaLevel3);
       this.elaLevel4 = Math.round(value.elaLevel4);
-      console.log(this.mathLevel1);
+      this.name = value.name;
     }
+  },
+  updated() {
+    this.mathDataPie[0].values = [];
+
+    this.mathDataPie[0].values.push(
+      this.mathLevel1,
+      this.mathLevel2,
+      this.mathLevel3,
+      this.mathLevel4
+    );
+
+    console.log(this.mathDataPie[0].values);
+    Plotly.redraw(this.$refs.plot1);
   },
 
   // Template to show on screen
   template: `<div>
       <br>
-      <row>
+      <v-layout row wrap>
         <v-col cols="12" sm="6">
           <v-card elevation="2">
             <v-card-title>Setting</v-card-title>
@@ -231,10 +290,11 @@ Papa Parse: https://www.papaparse.com/
         </v-col>
         <v-col cols="12" sm="6">
           <v-card elevation="2">
-            <v-card-title>District</v-card-title>
+            <v-card-title>School Info</v-card-title>
+            <div ref="plot1"></div>
           </v-card>
         </v-col>
-      </row>
+      </v-layout>
       <v-btn @click="load">Load</v-btn>
       <v-btn @click="clear">Clear</v-btn>
       
@@ -243,16 +303,7 @@ Papa Parse: https://www.papaparse.com/
         width="500"
       >
           <v-card>
-          <v-card-text>
-            Math Level 1: {{ mathLevel1 }}
-            Math Level 2: {{ mathLevel2 }}
-            Math Level 3: {{ mathLevel3 }}
-            Math Level 4: {{ mathLevel4 }}
-            ELA Level 1: {{ elaLevel1 }}
-            ELA Level 2: {{ elaLevel2 }}
-            ELA Level 3: {{ elaLevel3 }}
-            ELA Level 4: {{ elaLevel4 }}
-          </v-card-text>
+          
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
@@ -272,6 +323,22 @@ Papa Parse: https://www.papaparse.com/
         @click:row="handleClick"
         hide-default-footer
         disable-pagination>
+        <template v-slot:item.elaLevel34="{ item }">
+        <v-chip
+          :color="getColorELA(item.elaLevel34)"
+          dark
+        >
+          {{ item.elaLevel34 }}
+        </v-chip>
+      </template>
+      <template v-slot:item.mathLevel34="{ item }">
+        <v-chip
+          :color="getColorMath(item.mathLevel34)"
+          dark
+        >
+          {{ item.mathLevel34 }}
+        </v-chip>
+      </template>
     </v-data-table>
     </div>`
 });
